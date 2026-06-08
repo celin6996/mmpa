@@ -1,4 +1,6 @@
 import pygame
+import sys
+import random
 
 from src.config import (
     LARGURA_TELA,
@@ -23,121 +25,74 @@ from src.dados import (
     carregar_recorde,
 )
 
+TAMANHO_BLOCO = 20
+COR_FUNDO = (30, 30, 30)       
+COR_ARANHA = (100, 50, 150)    
+COR_INSETO = (255, 69, 0)      
 
-def executar_jogo():
-    """Executa o loop principal do jogo e controla estado, colisões e pontuação."""
+def inicializar():
     pygame.init()
-    
-
     tela = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
     pygame.display.set_caption(TITULO_JOGO)
-
     relogio = pygame.time.Clock()
-    rodando = True
+    return tela, relogio
 
-    # 1. Carregando as imagens recortadas do Spritesheet
+def processar_eventos(direcao_atual):
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+            
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP and direcao_atual != "BAIXO":
+                return "CIMA"
+            elif event.key == pygame.K_DOWN and direcao_atual != "CIMA":
+                return "BAIXO"
+            elif event.key == pygame.K_LEFT and direcao_atual != "DIREITA":
+                return "ESQUERDA"
+            elif event.key == pygame.K_RIGHT and direcao_atual != "ESQUERDA":
+                return "DIREITA"
+            elif event.key == pygame.K_ESCAPE:
+                pygame.quit()
+                sys.exit()
+                
+    return direcao_atual
 
+def atualizar_posicao(pos_x, pos_y, direcao):
+    if direcao == "CIMA":
+        pos_y -= TAMANHO_BLOCO
+    elif direcao == "BAIXO":
+        pos_y += TAMANHO_BLOCO
+    elif direcao == "ESQUERDA":
+        pos_x -= TAMANHO_BLOCO
+    elif direcao == "DIREITA":
+        pos_x += TAMANHO_BLOCO
+    return pos_x, pos_y
 
-    # Jogador: usando tamanho 110x110 para capturar o quadrado perfeitamente
-    player_image = pegar_sprite(CAMINHO_SPRITES, x=110, y=120, width=190, height=190, scale=0.5)
+def desenhar_tela(tela, aranha_x, aranha_y, inseto_x, inseto_y):
+    tela.fill(COR_FUNDO) 
+    pygame.draw.rect(tela, COR_ARANHA, (aranha_x, aranha_y, TAMANHO_BLOCO, TAMANHO_BLOCO))
+    pygame.draw.rect(tela, COR_INSETO, (inseto_x, inseto_y, TAMANHO_BLOCO, TAMANHO_BLOCO))
+    pygame.display.flip()
 
-    # Gema pequena: usando tamanho 64x64
-    gem_image    = pegar_sprite(CAMINHO_SPRITES, x=900, y=690, width=200, height=200, scale=0.5)
-
-    # Morcego: usando tamanho 180x120 por causa das asas abertas
-    bat_image    = pegar_sprite(CAMINHO_SPRITES, x=905, y=1060, width=200, height=130, scale=0.5)
+def executar_jogo():
+    tela, relogio = inicializar()
     
-    # 2. Criando a estrutura de Sprites usando Dicionários
-    jogador = {
-        "imagem": player_image,
-        "rect": player_image.get_rect(topleft=(100, 100))
-    }
-
-    gema = {
-        "imagem": gem_image,
-        "rect": gem_image.get_rect(topleft=(500, 300))
-    }
+    aranha_x = LARGURA_TELA // 2
+    aranha_y = ALTURA_TELA // 2
+    direcao = "DIREITA"
     
-    inimigo = {
-        "imagem": bat_image,
-        "rect": bat_image.get_rect(topleft=(200, 500))
-    }
-
-    velocidade = 5
-    pontos = 0
-    vidas = 3
-    recorde = carregar_recorde(CAMINHO_RECORDE)
-
-    # Loop principal: processa entrada, atualiza estado e renderiza a cena.
-    while rodando:
+    inseto_x = random.randint(0, (LARGURA_TELA - TAMANHO_BLOCO) // TAMANHO_BLOCO) * TAMANHO_BLOCO
+    inseto_y = random.randint(0, (ALTURA_TELA - TAMANHO_BLOCO) // TAMANHO_BLOCO) * TAMANHO_BLOCO
+    
+    while True:
+        direcao = processar_eventos(direcao)
+        aranha_x, aranha_y = atualizar_posicao(aranha_x, aranha_y, direcao)
+        
+        if abs(aranha_x - inseto_x) < TAMANHO_BLOCO and abs(aranha_y - inseto_y) < TAMANHO_BLOCO:
+            inseto_x = random.randint(0, (LARGURA_TELA - TAMANHO_BLOCO) // TAMANHO_BLOCO) * TAMANHO_BLOCO
+            inseto_y = random.randint(0, (ALTURA_TELA - TAMANHO_BLOCO) // TAMANHO_BLOCO) * TAMANHO_BLOCO
+        
+        desenhar_tela(tela, aranha_x, aranha_y, inseto_x, inseto_y)
+        
         relogio.tick(FPS)
-
-        for evento in pygame.event.get():
-            if evento.type == pygame.QUIT:
-                rodando = False
-
-        teclas = pygame.key.get_pressed()
-
-        # Movimentação alterando direto os eixos X e Y do retângulo do jogador
-        if teclas[pygame.K_LEFT]:
-            jogador["rect"].x -= velocidade
-        if teclas[pygame.K_RIGHT]:
-            jogador["rect"].x += velocidade
-        if teclas[pygame.K_UP]:
-            jogador["rect"].y -= velocidade
-        if teclas[pygame.K_DOWN]:
-            jogador["rect"].y += velocidade
-
-        # Limitando o jogador dentro das bordas da tela usando as propriedades do Rect
-        jogador["rect"].x = limitar_valor(jogador["rect"].x, 0, LARGURA_TELA - jogador["rect"].width)
-        jogador["rect"].y = limitar_valor(jogador["rect"].y, 0, ALTURA_TELA - jogador["rect"].height)
-
-        # Verificação de colisão com a Gema (antigo 'item')
-        if verificar_colisao(jogador["rect"], gema["rect"]):
-            pontos = calcular_pontos(pontos, 10)
-
-            # Move a gema de lugar ao coletar
-            gema["rect"].x += 80
-            gema["rect"].y += 50
-
-            # Se a gema sair da tela, volta para uma posição segura
-            if gema["rect"].x > LARGURA_TELA - gema["rect"].width:
-                gema["rect"].x = 50
-            if gema["rect"].y > ALTURA_TELA - gema["rect"].height:
-                gema["rect"].y = 50
-
-        # Verificação de colisão com o Inimigo
-        if verificar_colisao(jogador["rect"], inimigo["rect"]):
-            vidas = tomar_dano(vidas, 1)
-
-            # Afasta o inimigo ao colidir
-            inimigo["rect"].x += 80
-            inimigo["rect"].y += 50
-
-            if inimigo["rect"].x > LARGURA_TELA - inimigo["rect"].width:
-                inimigo["rect"].x = 50
-            if inimigo["rect"].y > ALTURA_TELA - inimigo["rect"].height:
-                inimigo["rect"].y = 50
-
-        # Regras de fim de jogo e recorde
-        if jogador_perdeu(vidas):
-            rodando = False
-
-        if pontos > recorde:
-            recorde = pontos
-            salvar_recorde(CAMINHO_RECORDE, recorde)
-
-        pygame.display.set_caption(
-            f"{TITULO_JOGO} | Pontos: {pontos} | Recorde: {recorde} | Vidas: {vidas}"
-        )
-
-        tela.fill(CINZA)
-
-        # Desenhando os elementos na tela passando a imagem e o rect de cada dicionário
-        tela.blit(gema["imagem"], gema["rect"])
-        tela.blit(inimigo["imagem"], inimigo["rect"])
-        tela.blit(jogador["imagem"], jogador["rect"])
-
-        pygame.display.flip()
-
-    pygame.quit()
