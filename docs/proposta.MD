@@ -4,7 +4,7 @@
 
 * Arthur Moraes Braga Araujo
 * Matheus Possemato Lopes
-* Pedro Marcos
+* Pedro Marcos Costa
 * Marcelo Artur Soares Sartori
 
 ---
