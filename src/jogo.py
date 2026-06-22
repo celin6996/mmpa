@@ -52,7 +52,7 @@ def inicializar():
 
 
 def processar_eventos(direcao_atual):
-    """Lê eventos de teclado e devolve a nova direção de movimento."""
+    
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -75,7 +75,7 @@ def processar_eventos(direcao_atual):
 
 
 def atualizar_posicao(pos_x, pos_y, direcao):
-    """Calcula a nova posição da cabeça da aranha, com wrap-around nas bordas."""
+    
     if direcao == "CIMA":
         pos_y -= TAMANHO_BLOCO
     elif direcao == "BAIXO":
@@ -85,7 +85,7 @@ def atualizar_posicao(pos_x, pos_y, direcao):
     elif direcao == "DIREITA":
         pos_x += TAMANHO_BLOCO
 
-    # Atravessa a borda da tela e reaparece do lado oposto (teia sem fim)
+    
     pos_x = pos_x % LARGURA_TELA
     pos_y = pos_y % ALTURA_TELA
 
@@ -93,7 +93,7 @@ def atualizar_posicao(pos_x, pos_y, direcao):
 
 
 def gerar_posicao_inseto(corpo_aranha):
-    """Sorteia uma posição livre (fora do corpo da aranha) para o inseto."""
+    
     colunas = LARGURA_TELA // TAMANHO_BLOCO
     linhas = ALTURA_TELA // TAMANHO_BLOCO
 
@@ -105,7 +105,7 @@ def gerar_posicao_inseto(corpo_aranha):
 
 
 def _construir_fundo_gradiente():
-    """Pré-renderiza uma superfície com gradiente vertical para o fundo."""
+    
     fundo = pygame.Surface((LARGURA_TELA, ALTURA_TELA))
     for y in range(ALTURA_TELA):
         proporcao = y / ALTURA_TELA
@@ -118,7 +118,7 @@ def _construir_fundo_gradiente():
 
 
 def _construir_teia(pontos_brilho_seed):
-    """Pré-renderiza a teia de aranha estilizada em uma superfície com alpha."""
+
     camada = pygame.Surface((LARGURA_TELA, ALTURA_TELA), pygame.SRCALPHA)
 
     cantos = [
@@ -141,7 +141,7 @@ def _construir_teia(pontos_brilho_seed):
             raios_pontas.append((fim_x, fim_y))
             pygame.draw.aaline(camada, (*COR_TEIA, 130), (centro_x, centro_y), (fim_x, fim_y))
 
-        # Espirais conectando os raios (fios em arco, como teia real)
+       
         num_espirais = 7
         for nivel in range(1, num_espirais + 1):
             fator = nivel / num_espirais
@@ -154,7 +154,7 @@ def _construir_teia(pontos_brilho_seed):
             pontos_anel.append(pontos_anel[0])
             pygame.draw.aalines(camada, (*COR_TEIA, 100), False, pontos_anel)
 
-    # Pontinhos de "orvalho" brilhando em alguns cruzamentos da teia
+
     rng = random.Random(pontos_brilho_seed)
     for _ in range(35):
         gx = rng.randint(20, LARGURA_TELA - 20)
@@ -167,20 +167,20 @@ def _construir_teia(pontos_brilho_seed):
 
 
 def desenhar_cenario_teia(tela, fundo_cache, teia_cache):
-    """Desenha o cenário estilizado: gradiente de fundo + teia de aranha."""
+
     tela.blit(fundo_cache, (0, 0))
     tela.blit(teia_cache, (0, 0))
 
 
 def desenhar_aranha(tela, corpo, direcao):
-    """Desenha a aranha segmento a segmento; o corpo cresce conforme come."""
+    
     total_segmentos = len(corpo)
 
     for indice, (seg_x, seg_y) in enumerate(corpo):
         eh_cabeca = indice == 0
         cor = COR_ARANHA_CABECA if eh_cabeca else COR_ARANHA_CORPO
 
-        # A "bunda" da aranha (últimos segmentos) cresce maior/redonda
+        
         eh_traseira = indice >= total_segmentos - 2 and total_segmentos > 1
         tamanho = TAMANHO_BLOCO
         if eh_traseira:
@@ -205,7 +205,7 @@ def desenhar_aranha(tela, corpo, direcao):
 
 
 def desenhar_inseto(tela, inseto_x, inseto_y):
-    """Desenha o inseto que a aranha deve comer."""
+    
     pygame.draw.rect(tela, COR_INSETO, (inseto_x + 7, inseto_y + 5, 8, 12))
     pygame.draw.rect(tela, COR_INSETO_ASA, (inseto_x, inseto_y + 4, 7, 7))
     pygame.draw.rect(tela, COR_INSETO_ASA, (inseto_x + 15, inseto_y + 4, 7, 7))
@@ -214,7 +214,7 @@ def desenhar_inseto(tela, inseto_x, inseto_y):
 
 
 def desenhar_hud(tela, fonte, pontos, recorde, tempo_decorrido_ms):
-    """Desenha a pontuação, o recorde e o cronômetro (tempo de sobrevivência)."""
+    
     segundos = calcular_tempo_decorrido(tempo_decorrido_ms)
     texto_tempo_str = formatar_tempo(segundos)
 
@@ -228,7 +228,7 @@ def desenhar_hud(tela, fonte, pontos, recorde, tempo_decorrido_ms):
 
 
 def desenhar_fim_de_jogo(tela, fonte, fonte_grande, pontos, recorde, novo_recorde, tempo_decorrido_ms):
-    """Mostra a tela de fim de jogo, com pontuação final e tempo de sobrevivência."""
+    
     overlay = pygame.Surface((LARGURA_TELA, ALTURA_TELA))
     overlay.set_alpha(200)
     overlay.fill(PRETO)
@@ -264,7 +264,7 @@ def executar_jogo():
     fundo_cache = _construir_fundo_gradiente()
     teia_cache = _construir_teia(pontos_brilho_seed=42)
 
-    # A aranha começa com 3 segmentos de corpo (cabeça + 2)
+    
     cabeca_x = (LARGURA_TELA // 2) - (LARGURA_TELA // 2) % TAMANHO_BLOCO
     cabeca_y = (ALTURA_TELA // 2) - (ALTURA_TELA // 2) % TAMANHO_BLOCO
     corpo = [
@@ -280,12 +280,11 @@ def executar_jogo():
     recorde = carregar_recorde(CAMINHO_RECORDE)
     novo_recorde = False
 
-    # O tempo aqui NAO e um limite: e apenas um cronometro que conta
-    # quantos segundos o jogador conseguiu sobreviver na partida.
+ 
     tempo_decorrido_ms = 0
     jogo_acabou = False
 
-    # Controla a velocidade de movimento dos blocos sem depender do FPS de desenho
+    
     intervalo_movimento_ms = 130
     acumulador_movimento_ms = 0
 

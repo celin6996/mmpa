@@ -17,6 +17,7 @@ O desenvolvimento deste projeto foi realizado com base em conhecimentos gerais d
 
 ![primeira parte](fontes/parte1.jpeg)
 ![segunda parte](fontes/parte2.jpeg)
+![terceira parte](fontes/parte3.)
 
 ## Agradecimentos
 
