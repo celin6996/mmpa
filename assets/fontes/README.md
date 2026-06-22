@@ -15,8 +15,8 @@ O desenvolvimento deste projeto foi realizado com base em conhecimentos gerais d
 
 ## Licenças e recursos
 
-* Alguns assets (imagens, sons e fontes) podem ter origem externa.
-* Sempre que possível, verificar e respeitar as licenças de uso dos recursos utilizados.
+![primeira parte](fontes/parte1.jpeg)
+![segunda parte](fontes/parte2.jpeg)
 
 ## Agradecimentos
 
