@@ -1,10 +1,10 @@
 # Testes
 
-Esta pasta contem testes automatizados do projeto.
+Esta pasta contém testes automatizados do projeto.
 
 ## Arquivos
 
-- `test_logica.py`: valida funcoes puras de logica em `src/funcoes.py`.
+* `test_logica.py`: valida funções puras de lógica em `src/funcoes.py`.
 
 ## Como executar
 
@@ -12,7 +12,9 @@ Esta pasta contem testes automatizados do projeto.
 python -m pytest
 ```
 
-## Boas praticas
+## Boas práticas
 
-- Crie testes para toda regra de pontuacao, vidas e condicoes de fim de jogo.
-- Prefira funcoes pequenas e testaveis no modulo `src/funcoes.py`.
+* Crie testes para todas as regras de pontuação, crescimento da aranha e condições de fim de jogo.
+* Prefira funções pequenas, simples e testáveis no módulo `src/funcoes.py`.
+* Evite dependências desnecessárias entre testes.
+* Garanta que os testes sejam independentes entre si.
